@@ -1,38 +1,54 @@
-.App {
-  text-align: center;
-}
+/* Navbar.js */
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.navBar {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: space-around;
+  margin-bottom: 50px;
+}
+
+
+/* GameWindow.js */
+
+.chessBoard {
+  display: grid;
+  place-content: center;
+  grid-template-columns: repeat(8, 10vmin);
+  grid-template-rows: repeat(8, 10vmin);
+}
+
+.square {
+  display: grid;
+  place-content: center;
+  border: 1px solid;
+  user-select: none;
+  background-color: red;
+}
+
+.square:focus {
+  background-color: rgb(241, 142, 142);
+}
+
+.light {
+  background-color: #e8edf9;
+}
+
+.dark {
+  background-color: #b7c0d8;
+}
+
+.chessPiece {
+  width: 97%;
+  height: 97%;
+}
+
+.players {
+  display: flex;
+  gap: 30%;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  padding-top: 20px;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.players > span {
+  font-size: large;
+  font-weight: 600;
 }

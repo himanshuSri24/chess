@@ -43,7 +43,7 @@
 
 .players {
   display: flex;
-  gap: 30%;
+  gap: 12%;
   justify-content: center;
   padding-top: 20px;
 }

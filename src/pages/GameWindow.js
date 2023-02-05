@@ -1,14 +1,15 @@
 import Pieces from "../components/Pieces"
 import {useState} from "react"
 import CheckMove from "../components/CheckMove"
-
 export default function GameWindow() {
 
     let horizontal = []
     let vertical = []
     let board = []
+    var trial = true
 
-    let srcX = 0, srcY = 0
+    const [srcX, setSrcX] = useState(0)
+    const [srcY, setSrcY] = useState(0)
 
     const [p1move, setP1move] = useState(true)
 
@@ -19,7 +20,7 @@ export default function GameWindow() {
         let piece = null
         let x = Object.entries(Pieces)
         x.map((key) => {
-            if(key[1]["x"] == x1 && key[1]["y"] == y1){
+            if(key[1]["x"] === x1 && key[1]["y"] === y1){
                 piece = key
             }
             return ""
@@ -27,7 +28,7 @@ export default function GameWindow() {
         return piece
     }
 
-    function clickFunc (e, pieceName, srcX, srcY) {
+    function clickFunc (e, pieceName) {
         
         var x = Object.entries(Pieces)
         x.map((key) => {
@@ -36,8 +37,8 @@ export default function GameWindow() {
                     if(Pieces[pieceName]["color"] === p1move+''){
                     setClickCount(1)
                     setActivePiece(pieceName)
-                    srcX = e.target.getAttribute("a-key")[0]
-                    srcY = e.target.getAttribute("a-key")[3]
+                    setSrcX(e.target.getAttribute("a-key")[0])
+                    setSrcY(e.target.getAttribute("a-key")[3])
                 }
             }
                 return key
@@ -48,6 +49,8 @@ export default function GameWindow() {
         if(clickCount === 1) {
             let xToMoveTo = e.target.getAttribute("a-key")[0]
             let yToMoveTo = e.target.getAttribute("a-key")[3]
+            trial = CheckMove(activePiece, srcX, srcY, xToMoveTo, yToMoveTo, board, Pieces)
+            if(trial){
             let pieceAtPlace = pieceAtPlaceToMove(xToMoveTo, yToMoveTo)
             if(pieceAtPlace) {
                 if(Pieces[activePiece]["color"] !== pieceAtPlace[1]["color"]){
@@ -60,9 +63,9 @@ export default function GameWindow() {
             }
             Pieces[activePiece]["x"] = xToMoveTo
             Pieces[activePiece]["y"] = yToMoveTo
-            setClickCount(0)
             setP1move(!p1move)
-            CheckMove(activePiece, srcX, srcY, xToMoveTo, yToMoveTo, board, Pieces)
+        }
+        setClickCount(0)
         }
     }
 
@@ -91,14 +94,14 @@ export default function GameWindow() {
             if((i+j) % 2 === 0)
                 board.push(
                 <div className="square light" key = {`${i}, ${j}`} a-key = {`${8-i}, ${j+1}`} 
-                onClick={(event) => {clickFunc(event, pieceName, srcX, srcY)}} tabIndex={[i,j]}>
+                onClick={(event) => {clickFunc(event, pieceName)}} tabIndex={[i,j]}>
                     {x && 
                     <img className = "chessPiece" a-key = {`${8-i}, ${j+1}`} src ={`${x}`} alt = "chessPiece" />}
                 </div>)
             else
                 board.push(
                 <div className="square dark" key = {`${i}, ${j}`} a-key = {`${8-i}, ${j+1}`}
-                onClick={(event) => {clickFunc(event, pieceName, srcX, srcY)}} tabIndex={[i,j]}>
+                onClick={(event) => {clickFunc(event, pieceName)}} tabIndex={[i,j]}>
                     {x && 
                     <img  className = "chessPiece" a-key = {`${8-i}, ${j+1}`} src ={`${x}`} alt = "chessPiece" />}
                 </div>)
@@ -112,7 +115,8 @@ export default function GameWindow() {
   return (
     <>
     <div className="chessBoard">{board}</div>
-    <div className="players"><span style={{color: `${p1move ? "red" : "black"}`}}>Player 1</span><span  style={{color: `${!p1move ? "red" : "black"}`}}>Player 2</span></div>
+    <div className="players"><span style={{color: `${p1move ? "red" : "black"}`}}>Player 1</span><button onClick={()=>window.location.reload()}>New Game</button><span  style={{color: `${!p1move ? "red" : "black"}`}}>Player 2</span></div>
+    <div>{trial}</div>
     </>
   )
 }

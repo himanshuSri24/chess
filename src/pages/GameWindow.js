@@ -11,8 +11,6 @@ export default function GameWindow() {
     let initX = 0
     let initY = 0
 
-    let prevWasInCheck = [false, false]
-
     const [gameOver, setGameOver] = useState(false)
     const [srcX, setSrcX] = useState(0)
     const [srcY, setSrcY] = useState(0)
@@ -30,9 +28,6 @@ export default function GameWindow() {
     useEffect(() => {
         console.log("White: ", whiteCheck)
         console.log("Black: ", blackCheck)
-        console.log("Pieces giving check : ", piecesGivingCheck)
-        
-        
 
       }, [whiteCheck, blackCheck, piecesGivingCheck])
 
@@ -72,37 +67,53 @@ export default function GameWindow() {
             
             trial = CheckMove(activePiece, srcX, srcY, xToMoveTo, yToMoveTo, board, Pieces)
             if(trial){
-                let pieceAtPlace = pieceAtPlaceToMove(xToMoveTo, yToMoveTo)
-                if(pieceAtPlace) {
-                    if(Pieces[activePiece]["color"] !== pieceAtPlace[1]["color"]){
-                    Pieces[pieceAtPlace[0]]["alive"] = 0
-                    Pieces[pieceAtPlace[0]]["x"] = 0
-                    Pieces[pieceAtPlace[0]]["y"] = 0
-                    }else if(Pieces[activePiece]["color"] === pieceAtPlace[1]["color"]){
-                        return
+                if((activePiece.includes("white") && !whiteCheck)||(activePiece.includes("black") && !blackCheck)){
+                    let pieceAtPlace = pieceAtPlaceToMove(xToMoveTo, yToMoveTo)
+                    if(pieceAtPlace) {
+                        if(Pieces[activePiece]["color"] !== pieceAtPlace[1]["color"]){
+                        Pieces[pieceAtPlace[0]]["alive"] = 0
+                        Pieces[pieceAtPlace[0]]["x"] = 0
+                        Pieces[pieceAtPlace[0]]["y"] = 0
+                        }else if(Pieces[activePiece]["color"] === pieceAtPlace[1]["color"]){
+                            return
+                        }
+                        if (pieceAtPlace[0].includes("king")) {
+                            setGameOver(true)
+                        }
                     }
-                    if (pieceAtPlace[0].includes("king")) {
-                        setGameOver(true)
-                    }
+                    Pieces[activePiece]["x"] = xToMoveTo
+                    Pieces[activePiece]["y"] = yToMoveTo
                 }
+
                 initX = Pieces[activePiece]["x"] 
                 initY = Pieces[activePiece]["y"] 
+                let prevInCheck = [whiteCheck, blackCheck]
+                let pieceAtPlace = pieceAtPlaceToMove(xToMoveTo, yToMoveTo)
                 Pieces[activePiece]["x"] = xToMoveTo
                 Pieces[activePiece]["y"] = yToMoveTo
-                prevWasInCheck = [whiteCheck, blackCheck]
+                if (prevInCheck[0] || prevInCheck[1]) {
+                        if(pieceAtPlace) {
+                            if(Pieces[activePiece]["color"] !== pieceAtPlace[1]["color"]){
+                            Pieces[pieceAtPlace[0]]["alive"] = 0
+                            Pieces[pieceAtPlace[0]]["x"] = 0
+                            Pieces[pieceAtPlace[0]]["y"] = 0
+                        }
+                    }
+                }
+                
                 let currInCheck = [false, false]
                 CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
-                if(activePiece.includes("black") && currInCheck[1]) {
-                    console.log("Invalid Move")
+                if((activePiece.includes("black") && prevInCheck[1] && currInCheck[1]) || (activePiece.includes("white") && prevInCheck[0] && currInCheck[0])) {
                     Pieces[activePiece]["x"] = initX
                     Pieces[activePiece]["y"] = initY
+                    CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
                     setClickCount(0)
                 }else {
                     Pieces[activePiece]["x"] = xToMoveTo
                     Pieces[activePiece]["y"] = yToMoveTo
-                setP1move(!p1move)
+                    setP1move(!p1move)
                 }
-        }
+            }
         setClickCount(0)
         }
     }
@@ -130,7 +141,8 @@ export default function GameWindow() {
             x = placePiece(i, j) ? placePiece(i,j)[1] : null
             pieceName = placePiece(i, j) ? placePiece(i,j)[0] : null
             inCheck = (pieceName === "king_white" && whiteCheck) || (pieceName === "king_black" && blackCheck)  
-            if (inCheck) console.log(inCheck, pieceName)
+            // if (inCheck) 
+                // console.log(inCheck, pieceName)
             if((i+j) % 2 === 0)
                 board.push(
                 <div className="square light" key = {`${i}, ${j}`} a-key = {`${8-i}, ${j+1}`} 

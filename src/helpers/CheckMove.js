@@ -6,7 +6,6 @@ function CheckPieceAt (pieces, x, y) {
     xx.map((key) => {
         if(key[1]["x"] === x+'' && key[1]["y"] === y+''){
             isPieceThere = true
-            console.log(x, y, key[1]["x"], key[1]["y"])
         }
         return ""
     })
@@ -16,7 +15,6 @@ function CheckPieceAt (pieces, x, y) {
 function kingMove (srcX, srcY, destX, destY) {
     let distY = Math.abs(parseInt(srcY) - parseInt(destY))
         let distX = Math.abs(parseInt(srcX) - parseInt(destX))
-        console.log(distX, distY)
         return distX <= 1 && distY <= 1
 }
 
@@ -129,9 +127,10 @@ function pawnMove (piece, pieces, srcX, srcY, destX, destY) {
         }
     }
 
-    var normalMove = parseInt(srcX) === (parseInt(destX) + forwardMove)
-    
-    return ((firstMove || normalMove) && (srcY === destY)) || (false) 
+    let normalMove = parseInt(srcX) === (parseInt(destX) + forwardMove)
+    let diagMove = ((parseInt(srcY) === (parseInt(destY) + 1)) || (parseInt(srcY) === (parseInt(destY) - 1))) && normalMove
+
+    return ((firstMove || normalMove) && (srcY === destY) && (!CheckPieceAt(pieces, destX, destY))) || (diagMove && CheckPieceAt(pieces, destX, destY)) 
 }
 
 

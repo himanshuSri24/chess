@@ -1,6 +1,6 @@
 
 
-var Pieces = {
+let Pieces = {
     "king_white" : {
         "color" : "true",
         "x" : '1',

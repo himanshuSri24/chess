@@ -112,18 +112,17 @@ function rookMove (pieces, srcX, srcY, destX, destY) {
 function pawnMove (piece, pieces, srcX, srcY, destX, destY) {
     var forwardMove, firstMove
     firstMove = false
-    
     if(pieces[piece]["color"] === "true") {
         forwardMove = -1
         if(srcX === '2') {
-            firstMove = parseInt(srcX) === (parseInt(destX) + forwardMove - 1)
+            firstMove = parseInt(srcX) === (parseInt(destX) + forwardMove - 1) && !CheckPieceAt(pieces, parseInt(srcX)+1, parseInt(srcY))
         }
     }
     
     else{
         forwardMove = 1
         if(srcX === '7') {
-            firstMove = parseInt(srcX) === (parseInt(destX) + forwardMove + 1)
+            firstMove = parseInt(srcX) === (parseInt(destX) + forwardMove + 1) && !CheckPieceAt(pieces, parseInt(srcX)-1, parseInt(srcY))
         }
     }
 

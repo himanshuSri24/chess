@@ -16,6 +16,7 @@ export default function GameWindow() {
     let trial = true
 
     const [gameOver, setGameOver] = useState(false)
+    const [stalemate, setStalemate] = useState(false)
     const [srcX, setSrcX] = useState(0)
     const [srcY, setSrcY] = useState(0)
 
@@ -23,18 +24,13 @@ export default function GameWindow() {
     const [blackCheck, setBlackCheck] = useState(false)
     const [piecesGivingCheck, setPiecesGivingCheck] = useState([])
 
+    
 
     const [p1move, setP1move] = useState(true)
 
     const [clickCount, setClickCount] = useState(0)
     const [activePiece, setActivePiece] = useState(null)
 
-    useEffect(() => {
-        if(gameOver) {
-            async function endGame () {await delay(3000); window.location.reload(false)}
-            endGame()
-        }
-      }, [whiteCheck, blackCheck, piecesGivingCheck, gameOver])
 
     function pieceAtPlaceToMove (x1, y1) {
         let piece = null
@@ -102,6 +98,18 @@ export default function GameWindow() {
                         return
                     }
                 }
+                else {
+                    console.log("not in check")
+                    let colorOpp = Pieces[activePiece]["color"] ? "black" : "white"
+                    let isNoMovePresent = FunctionWhichChecksForValidNonCheckMove(Pieces, colorOpp
+                        , blackCheck, setBlackCheck, whiteCheck, setWhiteCheck, setPiecesGivingCheck, setClickCount,
+                        p1move, setP1move)
+                        console.log("Not :", isNoMovePresent)
+                    if (isNoMovePresent) {
+                        setStalemate(true)
+                        return
+                    }
+                }
                 let activeColorWhite = activePiece.includes("white") ? true : false
                 if((activeColorWhite && currInCheck[0]) || (!activeColorWhite && currInCheck[1])) {
                     moveDone = false
@@ -141,48 +149,85 @@ export default function GameWindow() {
 
 
     // Initializing board positions
-    let i, j;
+    let i, j, horInd = 0, vertInd = 7;
     for(i = 0; i < 8; i++){
         horizontal.push(String.fromCharCode(i+97))
         vertical.push(i+1+'')
-    }for(i = 0; i < 8; i ++){
-        for(j = 0; j < 8; j ++){
+    }for(i = 0; i < 9; i ++){
+        for(j = 0; j < 9; j ++){
+
+            if (j===0 && i !== 8){
+                board.push(<div className="square letters" key = {`${i}, ${j-1}`}>{vertical[vertInd--]}</div>) 
+            }
+
+            else if (j!==0 && i===8){
+                board.push(<div className="square letters" key = {`${i}, ${j-1}`}>{horizontal[horInd++]}</div>) 
+            }
+            
+            else if (j===0 && i===8){
+                board.push(<div className="square letters" key = {`${i}, ${j-1}`}></div>) 
+            }
+
+            else {
             let x, pieceName, inCheck
-            x = placePiece(i, j) ? placePiece(i,j)[1] : null
-            pieceName = placePiece(i, j) ? placePiece(i,j)[0] : null
+            x = placePiece(i, j-1) ? placePiece(i,j-1)[1] : null
+            pieceName = placePiece(i, j-1) ? placePiece(i,j-1)[0] : null
             inCheck = (pieceName === "king_white" && whiteCheck) || (pieceName === "king_black" && blackCheck)  
             if((i+j) % 2 === 0)
                 board.push(
-                <div className="square light" key = {`${i}, ${j}`} a-key = {`${8-i}, ${j+1}`} 
-                onClick={(event) => {clickFunc(event, pieceName)}} tabIndex={[i,j]}
+                <div className="square light" key = {`${i}, ${j-1}`} a-key = {`${8-i}, ${j}`} 
+                onClick={(event) => {clickFunc(event, pieceName)}} tabIndex={[i,j-1]}
                 style={{backgroundColor: inCheck ? "rgb(247, 49, 49)" : piecesGivingCheck.includes(pieceName) ? "rgb(247, 80, 80)" : ""}}>
                     {x && 
-                    <img className = "chessPiece" a-key = {`${8-i}, ${j+1}`} src ={`${x}`} alt = "chessPiece" />}
+                    <img className = "chessPiece" a-key = {`${8-i}, ${j}`} src ={`${x}`} alt = "chessPiece" />}
                 </div>)
             else
                 board.push(
-                <div className="square dark" key = {`${i}, ${j}`} a-key = {`${8-i}, ${j+1}`}
-                onClick={(event) => {clickFunc(event, pieceName)}} tabIndex={[i,j]}
+                <div className="square dark" key = {`${i}, ${j-1}`} a-key = {`${8-i}, ${j}`}
+                onClick={(event) => {clickFunc(event, pieceName)}} tabIndex={[i,j-1]}
                 style={{backgroundColor: inCheck ? "rgb(247, 49, 49)" : piecesGivingCheck.includes(pieceName) ? "rgb(247, 80, 80)" : ""}}>
                     {x && 
-                    <img  className = "chessPiece" a-key = {`${8-i}, ${j+1}`} src ={`${x}`} alt = "chessPiece" />}
+                    <img  className = "chessPiece" a-key = {`${8-i}, ${j}`} src ={`${x}`} alt = "chessPiece" />}
                 </div>)
-
+            }
         }
     }
 
     // Initial board insertion
 
-
   return (
     <>
-        { !gameOver &&
+    
+         { !gameOver && !stalemate &&
         <div>
             <div className="chessBoard">{board}</div> 
-            <div className="players"><span style={{color: `${p1move ? "red" : "black"}`}}>Player 1</span><button onClick={()=>window.location.reload()}>New Game</button><span  style={{color: `${!p1move ? "red" : "black"}`}}>Player 2</span></div>
-            <div>{trial}</div></div>
+            <div className="players">
+                {/* <button className="btn btn--stripe"><span style={{color: `${p1move ? "red" : "black"}`}}>Player 1</span></button> */}
+                <button className="btn btn--stripe" onClick={()=>window.location.reload()}>
+                <span style={{color: `${p1move ? "red" : "black"}`}}>Player 1</span> New Game 
+                <span style={{color: `${!p1move ? "red" : "black"}`}}>Player 2</span>
+                </button>
+                {/* <button className="btn btn--stripe"><span style={{color: `${!p1move ? "red" : "black"}`}}>Player 2</span></button> */}
+            </div>
+            <div>{trial}</div>
+            </div>
+
         }
-        {gameOver && <div>Game Over</div>}
+        
+        {gameOver && <div class="outer">
+                <div class="endText" style={{width: "42ch"}}>
+                    Game Over. It Was A Check Mate. {p1move ? "White Won." : "Black Won."}
+                </div>
+                <button className="btn btn--stripe btn--large" onClick={()=>window.location.reload()}>New Game</button>
+        </div>}
+        {stalemate && 
+        <div class="outer">
+            <div class="endText"  style={{width: "31ch"}}> 
+            Game Over. It Was A Stale Mate. 
+            </div>
+            <button className="btn btn--stripe btn--large" onClick={()=>window.location.reload()}>New Game</button>
+        </div>}
+        
     </>
   )
 }

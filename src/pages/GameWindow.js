@@ -2,14 +2,18 @@ import Pieces from "../components/Pieces"
 import {useState, useEffect} from "react"
 import CheckMove from "../helpers/CheckMove"
 import CheckCheck from "../helpers/CheckCheck"
+import FunctionWhichChecksForValidNonCheckMove from "../helpers/functionWhichChecksForValidNonCheckMove"
+
+const delay = ms => new Promise(
+    resolve => setTimeout(resolve, ms)
+  );
+
 export default function GameWindow() {
 
     let horizontal = []
     let vertical = []
     let board = []
     let trial = true
-    let initX = 0
-    let initY = 0
 
     const [gameOver, setGameOver] = useState(false)
     const [srcX, setSrcX] = useState(0)
@@ -26,10 +30,11 @@ export default function GameWindow() {
     const [activePiece, setActivePiece] = useState(null)
 
     useEffect(() => {
-        console.log("White: ", whiteCheck)
-        console.log("Black: ", blackCheck)
-
-      }, [whiteCheck, blackCheck, piecesGivingCheck])
+        if(gameOver) {
+            async function endGame () {await delay(3000); window.location.reload(false)}
+            endGame()
+        }
+      }, [whiteCheck, blackCheck, piecesGivingCheck, gameOver])
 
     function pieceAtPlaceToMove (x1, y1) {
         let piece = null
@@ -65,9 +70,10 @@ export default function GameWindow() {
             let xToMoveTo = e.target.getAttribute("a-key")[0]
             let yToMoveTo = e.target.getAttribute("a-key")[3]
             
+            let moveDone = false
+
             trial = CheckMove(activePiece, srcX, srcY, xToMoveTo, yToMoveTo, board, Pieces)
             if(trial){
-                if((activePiece.includes("white") && !whiteCheck)||(activePiece.includes("black") && !blackCheck)){
                     let pieceAtPlace = pieceAtPlaceToMove(xToMoveTo, yToMoveTo)
                     if(pieceAtPlace) {
                         if(Pieces[activePiece]["color"] !== pieceAtPlace[1]["color"]){
@@ -77,44 +83,48 @@ export default function GameWindow() {
                         }else if(Pieces[activePiece]["color"] === pieceAtPlace[1]["color"]){
                             return
                         }
-                        if (pieceAtPlace[0].includes("king")) {
-                            setGameOver(true)
-                        }
+                        
                     }
                     Pieces[activePiece]["x"] = xToMoveTo
                     Pieces[activePiece]["y"] = yToMoveTo
-                }
-
-                initX = Pieces[activePiece]["x"] 
-                initY = Pieces[activePiece]["y"] 
-                let prevInCheck = [whiteCheck, blackCheck]
-                let pieceAtPlace = pieceAtPlaceToMove(xToMoveTo, yToMoveTo)
-                Pieces[activePiece]["x"] = xToMoveTo
-                Pieces[activePiece]["y"] = yToMoveTo
-                if (prevInCheck[0] || prevInCheck[1]) {
-                        if(pieceAtPlace) {
-                            if(Pieces[activePiece]["color"] !== pieceAtPlace[1]["color"]){
-                            Pieces[pieceAtPlace[0]]["alive"] = 0
-                            Pieces[pieceAtPlace[0]]["x"] = 0
-                            Pieces[pieceAtPlace[0]]["y"] = 0
-                        }
+                    moveDone = true
+                
+                // after move, check if piece is in check
+                let currInCheck = [blackCheck, whiteCheck]
+                CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+                let colorInCheck = currInCheck[0] ? "white" : currInCheck[1] ? "black" : null
+                if (colorInCheck) {
+                    let areValidMovesPresent = FunctionWhichChecksForValidNonCheckMove(Pieces, colorInCheck
+                        , blackCheck, setBlackCheck, whiteCheck, setWhiteCheck, setPiecesGivingCheck, setClickCount,
+                        p1move, setP1move)
+                    if (areValidMovesPresent) {
+                        setGameOver(true)
+                        return
                     }
+                }
+                let activeColorWhite = activePiece.includes("white") ? true : false
+                if((activeColorWhite && currInCheck[0]) || (!activeColorWhite && currInCheck[1])) {
+                    moveDone = false
+                    if (pieceAtPlace && (Pieces[activePiece]["color"] !== pieceAtPlace[1]["color"])) {
+                        Pieces[pieceAtPlace[0]]["alive"] = 1
+                        Pieces[pieceAtPlace[0]]["x"] = xToMoveTo
+                        Pieces[pieceAtPlace[0]]["y"] = yToMoveTo
+                    }
+                    
+                    Pieces[activePiece]["x"] = srcX
+                    Pieces[activePiece]["y"] = srcY
+                    
+                    async function revertMove() {await delay(500);CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)}
+                    revertMove()
+                    setClickCount(0)
                 }
                 
-                let currInCheck = [false, false]
-                CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
-                if((activePiece.includes("black") && prevInCheck[1] && currInCheck[1]) || (activePiece.includes("white") && prevInCheck[0] && currInCheck[0])) {
-                    Pieces[activePiece]["x"] = initX
-                    Pieces[activePiece]["y"] = initY
-                    CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
-                    setClickCount(0)
-                }else {
-                    Pieces[activePiece]["x"] = xToMoveTo
-                    Pieces[activePiece]["y"] = yToMoveTo
+                if (moveDone) {
                     setP1move(!p1move)
                 }
-            }
-        setClickCount(0)
+            }    
+            setClickCount(0)
+            
         }
     }
 
@@ -141,8 +151,6 @@ export default function GameWindow() {
             x = placePiece(i, j) ? placePiece(i,j)[1] : null
             pieceName = placePiece(i, j) ? placePiece(i,j)[0] : null
             inCheck = (pieceName === "king_white" && whiteCheck) || (pieceName === "king_black" && blackCheck)  
-            // if (inCheck) 
-                // console.log(inCheck, pieceName)
             if((i+j) % 2 === 0)
                 board.push(
                 <div className="square light" key = {`${i}, ${j}`} a-key = {`${8-i}, ${j+1}`} 

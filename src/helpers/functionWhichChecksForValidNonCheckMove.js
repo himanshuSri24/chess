@@ -60,7 +60,7 @@ export const functionWhichChecksForValidNonCheckMove = (Pieces, colorInCheck, bl
                         }
 
                         if (moveDone) {
-                            console.log("Moved piece ", piece, "from ", srcX, srcY, "to ", i, j)
+                            // console.log("Moved piece ", piece, "from ", srcX, srcY, "to ", i, j)
                             isCheckMate = false
                             
                         }

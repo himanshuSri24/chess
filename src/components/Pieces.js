@@ -1,6 +1,6 @@
 
 
-let Pieces = {
+let PiecesObj = {
     "king_white" : {
         "color" : "true",
         "x" : '1',
@@ -229,4 +229,4 @@ let Pieces = {
     
 }
 
-export default Pieces
+export default PiecesObj

@@ -9,9 +9,9 @@ body {
 .navbar {
   transition: 300ms;
   width: 100%;
-  height: 15px;
+  height: 20px;
   opacity: 0;
-  background-color: #0d1117;
+  background-color: #303443;
   display: flex;
   align-items: center;
   top: 0;
@@ -257,7 +257,7 @@ body {
   animation: stripe-slide 12s infinite linear forwards;
 }
 .btn--large {
-  width: 50%;
+  width: 90%;
 }
 .btn--radius {
   border-radius: 36px;
@@ -265,3 +265,24 @@ body {
 
 
 /* CSS for button ends */
+
+/* CSS for piece selection */
+
+.selection {
+  position: absolute;
+  display: grid;
+  grid-template-rows: repeat(2, 20%);
+  grid-template-columns: repeat(2, 30%);
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  place-content: center;
+  left: 2vw;
+  
+  justify-content: center;
+  align-items: center;
+  background-color: #303443;
+  opacity: 80%;
+}
+
+/* CSS for piece selection ends */

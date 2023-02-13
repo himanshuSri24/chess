@@ -127,8 +127,9 @@ export default function GameWindow() {
             let yToMoveTo = e.target.getAttribute("a-key")[3]
             let castling = false
             let moveDone = false
-
-            trial = CheckMove(activePiece, srcX, srcY, xToMoveTo, yToMoveTo, board, Pieces)
+            let currInCheck = [blackCheck, whiteCheck]
+            trial = CheckMove(activePiece, srcX, srcY, xToMoveTo, yToMoveTo, board, Pieces, whiteCheck, blackCheck,
+                setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
             if(trial){
                     let pieceAtPlace = pieceAtPlaceToMove(xToMoveTo, yToMoveTo)
                     if(pieceAtPlace) {

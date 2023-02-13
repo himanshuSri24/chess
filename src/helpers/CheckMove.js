@@ -1,3 +1,8 @@
+import CheckCheck from "./CheckCheck"
+
+const delay = ms => new Promise(
+    resolve => setTimeout(resolve, ms)
+  );
 
 function CheckPieceAt (pieces, x, y) {
     let isPieceThere = false
@@ -12,7 +17,8 @@ function CheckPieceAt (pieces, x, y) {
     return isPieceThere
 }
 
-function kingMove (srcX, srcY, destX, destY, piece, Pieces) {
+function kingMove (srcX, srcY, destX, destY, piece, Pieces, whiteCheck, blackCheck
+    , setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck) {
     let distY = Math.abs(parseInt(srcY) - parseInt(destY))
     let distX = Math.abs(parseInt(srcX) - parseInt(destX))
     let col = Pieces[piece]["hasMoved"] ? null : !piece.includes("white") ? ["black", "white"] : ["white", "black"]
@@ -20,6 +26,122 @@ function kingMove (srcX, srcY, destX, destY, piece, Pieces) {
     let queenCastle = col && !Pieces["rook1_" + col[0]]["hasMoved"] && !CheckPieceAt(Pieces, srcX, 4) && !CheckPieceAt(Pieces, srcX, 3) && !CheckPieceAt(Pieces, srcX, 2)
     let castlingCondition1 = col && ((destY === '3' && destX === srcX && queenCastle) || (destY === '7' && destX === srcX && kingCastle))
     
+    if (col && col[0] === 'white') {
+        castlingCondition1 =  castlingCondition1 && !whiteCheck
+        // move king to places and check, then revert
+        if (castlingCondition1 && kingCastle) {
+            Pieces["king_white"]["y"] = '6'
+            CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+            if (currInCheck[0]) {
+                castlingCondition1 = false
+                const goodLooks = async () => {
+                    await delay(500)
+                    Pieces["king_white"]["y"] = '5'
+                    CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+                }
+                goodLooks()
+            }
+            else {
+                Pieces["king_white"]["y"] = '7'
+                CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+                if (currInCheck[0]) {
+                    castlingCondition1 = false
+                    const goodLooks = async () => {
+                        await delay(500)
+                        Pieces["king_white"]["y"] = '5'
+                        CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+                    }
+                    goodLooks()
+                }
+            }
+            Pieces["king_white"]["y"] = '5'
+        }
+        else if (castlingCondition1 && queenCastle) {
+            Pieces["king_white"]["y"] = '4'
+            CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+            if (currInCheck[0]) {
+                castlingCondition1 = false
+                const goodLooks = async () => {
+                    await delay(500)
+                    Pieces["king_white"]["y"] = '5'
+                    CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+                }
+                goodLooks()
+            }
+            else {
+                Pieces["king_white"]["y"] = '3'
+                CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+                if (currInCheck[0]) {
+                    castlingCondition1 = false
+                    const goodLooks = async () => {
+                        await delay(500)
+                        Pieces["king_white"]["y"] = '5'
+                        CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+                    }
+                    goodLooks()
+                }
+            }
+            Pieces["king_white"]["y"] = '5'
+        }
+    }
+    else if (col && col[0] === 'black') {
+        castlingCondition1 =  castlingCondition1 && !blackCheck
+        // move king to places and check, then revert
+        if (castlingCondition1 && kingCastle) {
+            Pieces["king_black"]["y"] = '6'
+            CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+            if (currInCheck[1]) {
+                castlingCondition1 = false
+                const goodLooks = async () => {
+                    await delay(500)
+                    Pieces["king_black"]["y"] = '5'
+                    CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+                }
+                goodLooks()
+            }
+            else {
+                Pieces["king_black"]["y"] = '7'
+                CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+                if (currInCheck[1]) {
+                    castlingCondition1 = false
+                    const goodLooks = async () => {
+                        await delay(500)
+                        Pieces["king_black"]["y"] = '5'
+                        CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+                    }
+                    goodLooks()
+                }
+            }
+            Pieces["king_black"]["y"] = '5'
+        }
+        else if (castlingCondition1 && queenCastle) {
+            Pieces["king_black"]["y"] = '4'
+            CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+            if (currInCheck[1]) {
+                castlingCondition1 = false
+                const goodLooks = async () => {
+                    await delay(500)
+                    Pieces["king_black"]["y"] = '5'
+                    CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+                }
+                goodLooks()
+            }
+            else {
+                Pieces["king_black"]["y"] = '3'
+                CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+                if (currInCheck[1]) {
+                    castlingCondition1 = false
+                    const goodLooks = async () => {
+                        await delay(500)
+                        Pieces["king_black"]["y"] = '5'
+                        CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
+                    }
+                    goodLooks()
+                }
+            }
+            Pieces["king_black"]["y"] = '5'
+        }       
+    }
     
     if (castlingCondition1) {
         if (queenCastle) {
@@ -157,10 +279,11 @@ function pawnMove (piece, pieces, srcX, srcY, destX, destY) {
 }
 
 
-export default function CheckMove(piece, srcX, srcY, destX, destY, board, pieces) {
+export default function CheckMove(piece, srcX, srcY, destX, destY, board, pieces, whiteCheck, blackCheck
+    , setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck) {
 
     if(piece.includes("king")){
-        return kingMove(srcX, srcY, destX, destY, piece, pieces)
+        return kingMove(srcX, srcY, destX, destY, piece, pieces, whiteCheck, blackCheck, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
     }
     
 

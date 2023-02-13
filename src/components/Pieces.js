@@ -1,4 +1,3 @@
-// Auto castling when risky move somehow, need to check checkmate and stalemate on promotion of pawn
 
 let PiecesObj = {
     "king_white" : {

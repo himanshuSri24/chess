@@ -12,10 +12,28 @@ function CheckPieceAt (pieces, x, y) {
     return isPieceThere
 }
 
-function kingMove (srcX, srcY, destX, destY) {
+function kingMove (srcX, srcY, destX, destY, piece, Pieces) {
     let distY = Math.abs(parseInt(srcY) - parseInt(destY))
-        let distX = Math.abs(parseInt(srcX) - parseInt(destX))
-        return distX <= 1 && distY <= 1
+    let distX = Math.abs(parseInt(srcX) - parseInt(destX))
+    let col = Pieces[piece]["hasMoved"] ? null : !piece.includes("white") ? ["black", "white"] : ["white", "black"]
+    let kingCastle = col && !Pieces["rook2_" + col[0]]["hasMoved"] && !CheckPieceAt(Pieces, srcX, 6) && !CheckPieceAt(Pieces, srcX, 7)
+    let queenCastle = col && !Pieces["rook1_" + col[0]]["hasMoved"] && !CheckPieceAt(Pieces, srcX, 4) && !CheckPieceAt(Pieces, srcX, 3) && !CheckPieceAt(Pieces, srcX, 2)
+    let castlingCondition1 = col && ((destY === '3' && destX === srcX && queenCastle) || (destY === '7' && destX === srcX && kingCastle))
+    
+    
+    if (castlingCondition1) {
+        if (queenCastle) {
+            Pieces["rook1_"+col[0]]["y"] = '4'
+        } else {
+            Pieces["rook2_"+col[0]]["y"] = '6'
+        }
+    }
+    
+    if ((distX <= 1 && distY <= 1) || (castlingCondition1)) {
+        return true
+    }
+        
+    return false
 }
 
 function bishopMove (pieces, srcX, srcY, destX, destY) {
@@ -89,7 +107,8 @@ function knightMove (srcX, srcY, destX, destY) {
     }
 }
 
-function rookMove (pieces, srcX, srcY, destX, destY) {
+function rookMove (pieces, srcX, srcY, destX, destY, piece) {
+    
     if (srcX !== destX && srcY !== destY)
             return false
     
@@ -106,6 +125,11 @@ function rookMove (pieces, srcX, srcY, destX, destY) {
                 return false
         }
         
+        if ((srcX === destX || srcY === destY) && pieces[piece]) {
+            // pieces[piece]["hasMoved"] = true
+            
+        }
+
         return (srcX === destX || srcY === destY) 
 }
 
@@ -136,7 +160,7 @@ function pawnMove (piece, pieces, srcX, srcY, destX, destY) {
 export default function CheckMove(piece, srcX, srcY, destX, destY, board, pieces) {
 
     if(piece.includes("king")){
-        return kingMove(srcX, srcY, destX, destY)
+        return kingMove(srcX, srcY, destX, destY, piece, pieces)
     }
     
 
@@ -156,7 +180,7 @@ export default function CheckMove(piece, srcX, srcY, destX, destY, board, pieces
     
 
     else if(piece.includes("rook")){
-        return rookMove (pieces, srcX, srcY, destX, destY)
+        return rookMove (pieces, srcX, srcY, destX, destY, piece)
     }
     
     

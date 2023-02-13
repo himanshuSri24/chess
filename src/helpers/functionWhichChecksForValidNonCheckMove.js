@@ -6,6 +6,17 @@ import CheckMove from "./CheckMove"
 //     resolve => setTimeout(resolve, ms)
 //   );
 
+
+function resetHasMoved(list, Pieces) {
+    Pieces["king_white"]["hasMoved"] = list[0]
+    Pieces["rook1_white"]["hasMoved"] = list[1] 
+    Pieces["rook2_white"]["hasMoved"] = list[2]
+    Pieces["king_black"]["hasMoved"] = list[3] 
+    Pieces["rook1_black"]["hasMoved"] = list[4]
+    Pieces["rook2_black"]["hasMoved"] = list[5]
+}
+
+
 export const functionWhichChecksForValidNonCheckMove = (Pieces, colorInCheck, blackCheck, setBlackCheck, whiteCheck, setWhiteCheck, setPiecesGivingCheck, setClickCount, p1move, setP1move) => {
 
     let isCheckMate = true
@@ -26,10 +37,15 @@ export const functionWhichChecksForValidNonCheckMove = (Pieces, colorInCheck, bl
     Object.keys(Pieces).forEach(piece => {
         for(let i = 1; i < 9; i ++) {
             for(let j = 1; j < 9; j ++) {
+                let castling = false
                 if(piece.includes(colorInCheck) && Pieces[piece]["alive"]) {
                     let flag = true
                     let srcX = Pieces[piece]["x"]
                     let srcY = Pieces[piece]["y"]
+                    const KRRWKRRB = [Pieces["king_white"]["hasMoved"], Pieces["rook1_white"]["hasMoved"], 
+                                    Pieces["rook2_white"]["hasMoved"], Pieces["king_black"]["hasMoved"], 
+                                    Pieces["rook1_black"]["hasMoved"], Pieces["rook2_black"]["hasMoved"]]  
+                    
                     if (!(srcX === i+'' && srcY === j+'' ) && CheckMove(piece, srcX, srcY, i+'', j+'', null, Pieces)) {
                         let pieceAtPlace = pieceAtPlaceToMove(i, j)
                         if(pieceAtPlace) {
@@ -44,11 +60,43 @@ export const functionWhichChecksForValidNonCheckMove = (Pieces, colorInCheck, bl
                             Pieces[piece]["x"] = i+''
                             Pieces[piece]["y"] = j+''
                             moveDone = true
+                            
+                                if(piece.includes("king") || piece.includes("rook")) {
+                                    if (piece.includes("king") && !Pieces[piece]["hasMoved"]) {
+                                        let rookMoved = piece.includes("white") ? "white" : "black"
+                                        let isRisky = (rookMoved === 'white' && whiteCheck) || (rookMoved === 'black' && blackCheck)
+                                        if (j+'' === '7' && !isRisky) {
+                                            Pieces["rook2_" + rookMoved]["hasMoved"] = true
+                                            castling = true
+                                        }
+                                        else if(j+'' === '3' && !isRisky) {
+                                            Pieces["rook1_" + rookMoved]["hasMoved"] = true
+                                            castling = true
+                                        }
+                                    }
+                                    Pieces[piece]["hasMoved"] = true
+                                }
                             }
                         }else {
                             Pieces[piece]["x"] = i+''
                             Pieces[piece]["y"] = j+''
                             moveDone = true
+                            
+                            if(piece.includes("king") || piece.includes("rook")) {
+                                if (piece.includes("king") && !Pieces[piece]["hasMoved"]) {
+                                    let rookMoved = piece.includes("white") ? "white" : "black"
+                                    let isRisky = (rookMoved === 'white' && whiteCheck) || (rookMoved === 'black' && blackCheck)
+                                    if (j+'' === '7' && !isRisky) {
+                                        Pieces["rook2_" + rookMoved]["hasMoved"] = true
+                                        castling = true
+                                    }
+                                    else if(j+'' === '3' && !isRisky) {
+                                        Pieces["rook1_" + rookMoved]["hasMoved"] = true
+                                        castling = true
+                                    }
+                                }
+                                Pieces[piece]["hasMoved"] = true
+                            }
                         }
                         if (flag){
                         let currInCheck = [whiteCheck, blackCheck]
@@ -60,7 +108,6 @@ export const functionWhichChecksForValidNonCheckMove = (Pieces, colorInCheck, bl
                         }
 
                         if (moveDone) {
-                            // console.log("Moved piece ", piece, "from ", srcX, srcY, "to ", i, j)
                             isCheckMate = false
                             
                         }
@@ -72,7 +119,16 @@ export const functionWhichChecksForValidNonCheckMove = (Pieces, colorInCheck, bl
                         
                         Pieces[piece]["x"] = srcX
                         Pieces[piece]["y"] = srcY
-                        
+                        if (castling) {
+                            let rookMoved = piece.includes("white") ? "white" : "black"
+                            if (j+'' === '7') {
+                                Pieces["rook2_" + rookMoved]["y"] = '8'
+                            }
+                            else if(j+'' === '3') {
+                                Pieces["rook1_" + rookMoved]["y"] = '1'
+                            }
+                        }
+                        resetHasMoved(KRRWKRRB, Pieces)
                         CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
                         setClickCount(0)
                         if (!isCheckMate) {

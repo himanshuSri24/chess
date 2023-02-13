@@ -1,4 +1,4 @@
-
+// Auto castling when risky move somehow, need to check checkmate and stalemate on promotion of pawn
 
 let PiecesObj = {
     "king_white" : {
@@ -7,6 +7,7 @@ let PiecesObj = {
         "y" : '5',
         "img" : "https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg", 
         "alive" : 1,
+        "hasMoved" : false
     },
     "queen_white" : {
         "color" : "true",
@@ -35,6 +36,7 @@ let PiecesObj = {
         "y" : '1',
         "img" : "https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg", 
         "alive" : 1,
+        "hasMoved" : false
     },
     "rook2_white" : {
         "color" : "true",
@@ -42,6 +44,7 @@ let PiecesObj = {
         "y" : '8',
         "img" : "https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg", 
         "alive" : 1,
+        "hasMoved" : false
     },
     "knight1_white" : {
         "color" : "true",
@@ -120,6 +123,7 @@ let PiecesObj = {
         "y" : '5',
         "img" : "https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg", 
         "alive" : 1,
+        "hasMoved" : false
     },
     "queen_black" : {
         "color" : "false",
@@ -148,6 +152,7 @@ let PiecesObj = {
         "y" : '1',
         "img" : "https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg", 
         "alive" : 1,
+        "hasMoved" : false
     },
     "rook2_black" : {
         "color" : "false",
@@ -155,6 +160,7 @@ let PiecesObj = {
         "y" : '8',
         "img" : "https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg", 
         "alive" : 1,
+        "hasMoved" : false
     },
     "knight1_black" : {
         "color" : "false",

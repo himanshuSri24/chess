@@ -1,5 +1,5 @@
 import Pieces from "../components/Pieces"
-import {useState, useEffect} from "react"
+import {useState} from "react"
 import CheckMove from "../helpers/CheckMove"
 import CheckCheck from "../helpers/CheckCheck"
 import FunctionWhichChecksForValidNonCheckMove from "../helpers/functionWhichChecksForValidNonCheckMove"
@@ -12,6 +12,15 @@ let extraPiecesCount = [[1, 1, 1, 1], [1, 1, 1, 1]] // White-QBKR, Black-QBKR
 const delay = ms => new Promise(
     resolve => setTimeout(resolve, ms)
   );
+
+function resetHasMoved(list) {
+    Pieces["king_white"]["hasMoved"] = list[0]
+    Pieces["rook1_white"]["hasMoved"] = list[1] 
+    Pieces["rook2_white"]["hasMoved"] = list[2]
+    Pieces["king_black"]["hasMoved"] = list[3] 
+    Pieces["rook1_black"]["hasMoved"] = list[4]
+    Pieces["rook2_black"]["hasMoved"] = list[5]
+}
 
 export default function GameWindow() {
 
@@ -29,7 +38,7 @@ export default function GameWindow() {
     const [blackCheck, setBlackCheck] = useState(false)
     const [piecesGivingCheck, setPiecesGivingCheck] = useState([])
     const [isPawnPromoted, setIsPawnPromoted] = useState([null ,false, null])
-    const [pieceToSet, setPieceToSet] = useState(0)
+    // const [pieceToSet, setPieceToSet] = useState(0)
 
     const [p1move, setP1move] = useState(true)
 
@@ -50,17 +59,46 @@ export default function GameWindow() {
     }
 
     function setPromotion (x) {
-        setPieceToSet(x)
+        // setPieceToSet(x)
         let col = isPawnPromoted[0].includes("white") ? 0 : 1
         Pieces[isPawnPromoted[0]]["alive"] = 0
         Pieces[extraPieces[col][x]+extraPiecesCount[col][x]] = _.cloneDeep(Pieces[extraPieces[col][x]])
-        console.log(extraPieces[col][x]+extraPiecesCount[col][x])
         Pieces[extraPieces[col][x]+extraPiecesCount[col][x]]["x"] = Pieces[isPawnPromoted[0]]["x"]
         Pieces[extraPieces[col][x]+extraPiecesCount[col][x]]["y"] = Pieces[isPawnPromoted[0]]["y"]
         Pieces[extraPieces[col][x]+extraPiecesCount[col][x]++]["alive"] = 1
         Pieces[isPawnPromoted[0]]["x"] = 0
         Pieces[isPawnPromoted[0]]["y"] = 0
         CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, isPawnPromoted[2])
+        const endIfMate = async () => {
+            let colorInCheck = isPawnPromoted[2][0] ? "white" : isPawnPromoted[2][1] ? "black" : null
+            if (colorInCheck) {
+                
+                let isNoMovePresent = FunctionWhichChecksForValidNonCheckMove(Pieces, colorInCheck
+                    , blackCheck, setBlackCheck, whiteCheck, setWhiteCheck, setPiecesGivingCheck, setClickCount,
+                    p1move, setP1move)
+                    // resetHasMoved(KRRWKRRB)
+                if (isNoMovePresent) {
+                    await delay(500)
+                    setGameOver(true)
+                    return
+                }
+            }
+            else {
+                
+                let colorOpp = Pieces[activePiece]["color"] ? "black" : "white"
+                let isNoMovePresent = FunctionWhichChecksForValidNonCheckMove(Pieces, colorOpp
+                    , blackCheck, setBlackCheck, whiteCheck, setWhiteCheck, setPiecesGivingCheck, setClickCount,
+                    p1move, setP1move)
+                    if (isNoMovePresent) {
+                    await delay(1000)
+                    setStalemate(true)
+                    return
+                }
+            }
+        }
+
+        endIfMate()
+
         setIsPawnPromoted(false)
     }
 
@@ -85,12 +123,11 @@ export default function GameWindow() {
         if(clickCount === 1) {
             let xToMoveTo = e.target.getAttribute("a-key")[0]
             let yToMoveTo = e.target.getAttribute("a-key")[3]
-            
+            let castling = false
             let moveDone = false
 
             trial = CheckMove(activePiece, srcX, srcY, xToMoveTo, yToMoveTo, board, Pieces)
             if(trial){
-                    console.log("This move is valid")
                     let pieceAtPlace = pieceAtPlaceToMove(xToMoveTo, yToMoveTo)
                     if(pieceAtPlace) {
                         if(Pieces[activePiece]["color"] !== pieceAtPlace[1]["color"]){
@@ -105,14 +142,32 @@ export default function GameWindow() {
                     Pieces[activePiece]["x"] = xToMoveTo
                     Pieces[activePiece]["y"] = yToMoveTo
                     moveDone = true
+
+                    const KRRWKRRB = [Pieces["king_white"]["hasMoved"], Pieces["rook1_white"]["hasMoved"], 
+                                    Pieces["rook2_white"]["hasMoved"], Pieces["king_black"]["hasMoved"], 
+                                    Pieces["rook1_black"]["hasMoved"], Pieces["rook2_black"]["hasMoved"]]  
+                    
+                    if(activePiece.includes("king") || activePiece.includes("rook")) {
+                        if (activePiece.includes("king") && !Pieces[activePiece]["hasMoved"]) {
+                            let rookMoved = activePiece.includes("white") ? "white" : "black"
+                            let isRisky = (rookMoved === 'white' && whiteCheck) || (rookMoved === 'black' && blackCheck)
+                            if (yToMoveTo === '7' && !isRisky) {
+                                Pieces["rook2_" + rookMoved]["hasMoved"] = true
+                                castling = true
+                            }
+                            else if(yToMoveTo === '3' && !isRisky) {
+                                Pieces["rook1_" + rookMoved]["hasMoved"] = true
+                                castling = true
+                            }
+                        }
+                        Pieces[activePiece]["hasMoved"] = true
+                    }
                     
                     let currInCheck = [blackCheck, whiteCheck]
                     CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)
                 
                     let activeColorWhite = activePiece.includes("white") ? true : false
-                    console.log("Active : ", activeColorWhite, " in check: ", currInCheck)
                     if((activeColorWhite && currInCheck[0]) || (!activeColorWhite && currInCheck[1])) {
-                        console.log("Have to go back")
                         moveDone = false
                         if (pieceAtPlace && (Pieces[activePiece]["color"] !== pieceAtPlace[1]["color"])) {
                             Pieces[pieceAtPlace[0]]["alive"] = 1
@@ -124,36 +179,37 @@ export default function GameWindow() {
                         Pieces[activePiece]["y"] = srcY
                         
                         async function revertMove() {await delay(500);CheckCheck(Pieces, setWhiteCheck, setBlackCheck, setPiecesGivingCheck, currInCheck)}
+                        
                         revertMove()
                         setClickCount(0)
                     }
                     else {
 
-                // after move, check if piece is in check
+                    // after move, check if piece is in checkmate or stalemate
                 
-                let colorInCheck = currInCheck[0] ? "white" : currInCheck[1] ? "black" : null
-                if (colorInCheck) {
-                    console.log("Check", colorInCheck)
-                    let isNoMovePresent = FunctionWhichChecksForValidNonCheckMove(Pieces, colorInCheck
-                        , blackCheck, setBlackCheck, whiteCheck, setWhiteCheck, setPiecesGivingCheck, setClickCount,
-                        p1move, setP1move)
-                    if (isNoMovePresent) {
-                        setGameOver(true)
-                        return
-                    }
-                }
-                else {
-                    console.log("not in check")
-                    let colorOpp = Pieces[activePiece]["color"] ? "black" : "white"
-                    let isNoMovePresent = FunctionWhichChecksForValidNonCheckMove(Pieces, colorOpp
-                        , blackCheck, setBlackCheck, whiteCheck, setWhiteCheck, setPiecesGivingCheck, setClickCount,
-                        p1move, setP1move)
-                        console.log("Not :", isNoMovePresent)
-                    if (isNoMovePresent) {
-                        setStalemate(true)
-                        return
-                    }
-                }
+                        let colorInCheck = currInCheck[0] ? "white" : currInCheck[1] ? "black" : null
+                        if (colorInCheck) {
+                            
+                            let isNoMovePresent = FunctionWhichChecksForValidNonCheckMove(Pieces, colorInCheck
+                                , blackCheck, setBlackCheck, whiteCheck, setWhiteCheck, setPiecesGivingCheck, setClickCount,
+                                p1move, setP1move)
+                                // resetHasMoved(KRRWKRRB)
+                            if (isNoMovePresent) {
+                                setGameOver(true)
+                                return
+                            }
+                        }
+                        else {
+                            
+                            let colorOpp = Pieces[activePiece]["color"] ? "black" : "white"
+                            let isNoMovePresent = FunctionWhichChecksForValidNonCheckMove(Pieces, colorOpp
+                                , blackCheck, setBlackCheck, whiteCheck, setWhiteCheck, setPiecesGivingCheck, setClickCount,
+                                p1move, setP1move)
+                            if (isNoMovePresent) {
+                                setStalemate(true)
+                                return
+                            }
+                        }
                 }
                 if (moveDone) {
                     if (((xToMoveTo === '8' && p1move) || (xToMoveTo === '1' && !p1move)) && activePiece.includes("pawn")) {
@@ -161,6 +217,18 @@ export default function GameWindow() {
                         
                     } 
                     setP1move(!p1move)
+                }
+                if(!moveDone) {
+                    if (castling) {
+                        let rookMoved = activePiece.includes("white") ? "white" : "black"
+                        if (yToMoveTo === '7') {
+                            Pieces["rook2_" + rookMoved]["y"] = '8'
+                        }
+                        else if(yToMoveTo === '3') {
+                            Pieces["rook1_" + rookMoved]["y"] = '1'
+                        }
+                    }
+                    resetHasMoved(KRRWKRRB)
                 }
             }    
             setClickCount(0)

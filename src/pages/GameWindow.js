@@ -79,6 +79,7 @@ export default function GameWindow() {
                     // resetHasMoved(KRRWKRRB)
                 if (isNoMovePresent) {
                     await delay(500)
+                    setP1move(!p1move)
                     setGameOver(true)
                     return
                 }
@@ -90,8 +91,9 @@ export default function GameWindow() {
                     , blackCheck, setBlackCheck, whiteCheck, setWhiteCheck, setPiecesGivingCheck, setClickCount,
                     p1move, setP1move)
                     if (isNoMovePresent) {
-                    await delay(1000)
-                    setStalemate(true)
+                        await delay(1000)
+                        setP1move(!p1move)
+                        setStalemate(true)
                     return
                 }
             }
@@ -302,12 +304,10 @@ export default function GameWindow() {
         <div>
             <div className="chessBoard">{board}</div> 
             <div className="players">
-                {/* <button className="btn btn--stripe"><span style={{color: `${p1move ? "red" : "black"}`}}>Player 1</span></button> */}
                 <button className="btn btn--stripe" onClick={()=>window.location.reload()}>
                 <span style={{color: `${p1move ? "red" : "black"}`}}>Player 1</span> New Game 
                 <span style={{color: `${!p1move ? "red" : "black"}`}}>Player 2</span>
                 </button>
-                {/* <button className="btn btn--stripe"><span style={{color: `${!p1move ? "red" : "black"}`}}>Player 2</span></button> */}
             </div>
             </div>
 

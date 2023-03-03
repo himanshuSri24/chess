@@ -9,8 +9,6 @@ export default function Home() {
   let animation = [`typing 3s steps(${textLen[i++]}) forwards, blink1 .5s step-end infinite alternate, removeBorder1 2s forwards 5s`, 
                 `typing 3s steps(${textLen[i++]}) forwards 3s, blink2 .5s step-end infinite alternate, removeBorder2 2s forwards 5s`]
 
-  const endText1 = document.querySelector('.endText1');
-
   return (
     <>
     <div class="outer">

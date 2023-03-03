@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import Home from "./pages/Home"
 import GameWindow from "./pages/GameWindow"
 import Navbar from "./components/Navbar"
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path='/newGame' element={<GameWindow/>}/>
           <Route path='*' element={<div>Error 404</div>}/>
         </Routes>
+        <Footer />
       </Router>
     </div>
   );

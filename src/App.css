@@ -95,10 +95,10 @@ body {
 /* End Game CSS */
 
 .outer {
-  height: 90vh;
+  height: 80vh;
   display: grid;
   place-items: center center;
-  margin-top: 15vh;
+  margin-top: 10vh;
 }
 
 .endText1, .endText2 {
@@ -202,7 +202,7 @@ body {
 }
 
 .btn {
-  width: 50vw;
+  width: 54vw;
   overflow: visible;
   margin: 0;
   padding: 0;
@@ -216,7 +216,7 @@ body {
   display: block;
   text-decoration: none;
   text-transform: uppercase;
-  padding: 16px 36px 22px;
+  padding: 16px 36px 18px;
   background-color: #fff;
   color: #666;
   border: 2px solid #666;
@@ -286,3 +286,22 @@ body {
 }
 
 /* CSS for piece selection ends */
+
+/* CSS for Footer starts */
+
+.footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #E9DCC9;
+  font-size: 1.1rem;
+  padding-bottom: 10px;
+}
+
+.footer a {
+  text-decoration: none;
+  color: #E9DCC9;
+  font-weight: lighter;
+}
+
+/* CSS for footer ends */

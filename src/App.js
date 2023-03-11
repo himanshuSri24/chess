@@ -11,6 +11,7 @@ function App() {
     <div className="App">
       <Router>
         <Navbar />
+        <div> He he he. I can edit your code!</div>
         <Routes>
           <Route path='/' element={<Home/>}/>
           <Route path='/newGame' element={<GameWindow/>}/>
